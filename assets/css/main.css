@@ -249,6 +249,18 @@ svg {
   text-wrap: balance;
 }
 
+/* Links that leave the site carry a small north-east arrow */
+a[target="_blank"]:not(.work__link)::after {
+  content: "";
+  display: inline-block;
+  width: 0.6em;
+  height: 0.6em;
+  margin-left: 0.4em;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M1 7 7 1M2.5 1H7v4.5' fill='none' stroke='%23000' stroke-width='1'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M1 7 7 1M2.5 1H7v4.5' fill='none' stroke='%23000' stroke-width='1'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
 /* --------------------------------------------------------------------------
    Ghost pill button (dark surface)
    -------------------------------------------------------------------------- */
