@@ -1,0 +1,7 @@
+.vercel
+.DS_Store
+
+# Design references — kept locally, not published
+DESIGN.md
+tokens.json
+theme.css

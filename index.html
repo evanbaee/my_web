@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Evan Bae — Software Engineer</title>
+    <meta
+      name="description"
+      content="Evan Bae is a software engineer in Seoul who plans, designs, builds and deploys systems — and a Big Data student at Hallym University."
+    />
+    <meta name="theme-color" content="#000000" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+
+    <!-- Link previews. Update these URLs if the site moves to a custom domain. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://evanbae.vercel.app/" />
+    <meta property="og:title" content="Evan Bae — Software Engineer" />
+    <meta
+      property="og:description"
+      content="Plans, designs, builds and deploys systems. Seoul."
+    />
+    <meta property="og:image" content="https://evanbae.vercel.app/assets/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script>
+      document.documentElement.classList.add("js");
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..600;1,14..32,300..600&display=swap"
+    />
+    <!-- Hangul: SUIT, a light geometric face that sits well next to Inter -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.css"
+    />
+
+    <link rel="stylesheet" href="variables.css" />
+    <link rel="stylesheet" href="assets/css/main.css" />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="cursor" aria-hidden="true" data-cursor><span class="cursor__label"></span></div>
+
+    <!-- ============================================================
+         Navigation — sits on the hero and scrolls away with it
+         ============================================================ -->
+    <header class="nav">
+      <div class="container nav__inner">
+        <a class="nav__logo" href="#top" aria-label="Evan Bae, back to top">
+          <strong>evan bae</strong><span>seoul</span>
+        </a>
+
+        <p class="nav__meta">
+          <span class="nav__bar" aria-hidden="true"></span>
+          <span class="nav__zone">KST</span>
+          <span class="nav__clock" data-clock>--:--</span>
+        </p>
+
+        <nav class="nav__menu" aria-label="Primary">
+          <a href="#work">Work</a>
+          <a href="#about">About</a>
+          <a href="#approach">Approach</a>
+          <a href="#experience">Experience</a>
+          <a href="#contact">Contact</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <!-- ============================================================
+           Hero — one phrase over the iridescent backdrop.
+           Each .hero__phrase is one language; they cycle in order.
+           ============================================================ -->
+      <section class="hero" id="top">
+        <div class="hero__media" aria-hidden="true">
+          <canvas class="hero__canvas" data-iridescence></canvas>
+          <div class="hero__fallback"></div>
+          <div class="hero__grain"></div>
+        </div>
+        <div class="hero__fade" aria-hidden="true"></div>
+
+        <h1 class="hero__title" data-cycle aria-label="Evan Bae — Designed, Proven">
+          <span class="hero__phrase" lang="en">Des<em>i</em>gned, Proven</span>
+          <span class="hero__phrase" lang="ko">설계하고, 실증하다</span>
+        </h1>
+      </section>
+
+      <!-- ============================================================
+           Selected project
+           Media sits inside .work__inner, which drifts on scroll.
+           Logo covers use .work__media--logo; for a photo or video,
+           drop the modifier and put the <img>/<video> in .work__inner.
+           ============================================================ -->
+      <section class="section work" id="work">
+        <div class="container">
+          <p class="label" data-reveal>Selected project</p>
+
+          <ol class="work__list">
+            <li class="work__item" data-reveal>
+              <a
+                class="work__link"
+                href="https://premind.co.kr/"
+                target="_blank"
+                rel="noopener"
+                data-cursor-label="View"
+              >
+                <div class="work__media work__media--logo">
+                  <div class="work__inner" data-parallax>
+                    <img
+                      class="work__logo work__logo--wordmark"
+                      src="assets/images/premind-wordmark.png"
+                      alt="Premind logo"
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+                <h3 class="work__title">Premind — AI lecture analytics for students &amp; instructors</h3>
+                <p class="work__tags">Planning, System Design, Full-stack Development, 2026 — Now</p>
+              </a>
+            </li>
+
+            <li class="work__item" data-reveal>
+              <a
+                class="work__link"
+                href="https://hailens.k-university.ai/"
+                target="_blank"
+                rel="noopener"
+                data-cursor-label="View"
+              >
+                <div class="work__media work__media--logo">
+                  <div class="work__inner" data-parallax>
+                    <img
+                      class="work__logo work__logo--badge"
+                      src="assets/images/hailens-logo.svg"
+                      alt="Hailens logo"
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+                <h3 class="work__title">Hailens — Intelligent classroom platform for Hallym University</h3>
+                <p class="work__tags">
+                  System Design, Development, Pilot Deployment, Ops Automation, 2025 — 2026
+                </p>
+              </a>
+            </li>
+          </ol>
+
+          <div class="work__more" data-reveal>
+            <a class="pill" href="https://github.com/evanbaee" target="_blank" rel="noopener">
+              More on GitHub
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           About
+           ============================================================ -->
+      <section class="section about" id="about">
+        <div class="container">
+          <p class="label" data-reveal>About</p>
+
+          <h2 class="whisper about__lede" data-split-words>
+            I take ideas from a plan to a proven system — whatever the medium.
+          </h2>
+
+          <div class="about__body">
+            <figure class="about__portrait" data-reveal>
+              <img src="assets/images/me.jpeg" alt="Portrait of Evan Bae" loading="lazy" />
+            </figure>
+
+            <div class="about__copy" data-reveal>
+              <p>
+                I'm Evan, a software engineer in Seoul and a Big Data student at Hallym University.
+                I've been building software for nine years — freelancing from 2019 to 2025, and
+                leading development at Camorix since 2025.
+              </p>
+              <p>
+                My work starts before the code. I plan what should exist, design the system behind
+                it, then build and deploy it — on the web, as native software, or in whatever form
+                the problem calls for. At Camorix that has meant Premind, an AI lecture platform,
+                and Hailens, a classroom platform piloted at Hallym University.
+              </p>
+            </div>
+          </div>
+
+          <dl class="stats" data-reveal>
+            <div class="stats__item">
+              <dt>Years building software</dt>
+              <dd>09</dd>
+            </div>
+            <div class="stats__item">
+              <dt>Years freelancing, 2019 — 2025</dt>
+              <dd>06</dd>
+            </div>
+            <div class="stats__item">
+              <dt>Leading development at Camorix</dt>
+              <dd>2025—</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           Approach — plan, design, develop, deploy
+           ============================================================ -->
+      <section class="section capabilities" id="approach">
+        <div class="container">
+          <p class="label" data-reveal>Approach</p>
+
+          <p class="statement" data-reveal-lines>
+            <span>Plan,</span>
+            <span>Design,</span>
+            <span>Develop,</span>
+            <span>Deploy.</span>
+          </p>
+
+          <ul class="capabilities__grid">
+            <li data-reveal>
+              <h3>Plan</h3>
+              <p>Turning an idea into a clear scope — what should exist, for whom, and why.</p>
+            </li>
+            <li data-reveal>
+              <h3>Design</h3>
+              <p>System architecture, data and infrastructure shaped around the problem, not the trend.</p>
+            </li>
+            <li data-reveal>
+              <h3>Develop</h3>
+              <p>Whatever the medium — from C/C++ and Rust close to the metal to full-stack web.</p>
+            </li>
+            <li data-reveal>
+              <h3>Deploy</h3>
+              <p>Into production on Docker, AWS and GCP — and into the field, as with the Hailens pilot.</p>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           Experience
+           ============================================================ -->
+      <section class="section experience" id="experience">
+        <div class="container experience__grid">
+          <div class="experience__intro">
+            <p class="label" data-reveal>Experience</p>
+            <p class="experience__note" data-reveal>
+              Nine years of building software — and still studying.
+            </p>
+          </div>
+
+          <ol class="timeline">
+            <li class="timeline__row" data-reveal>
+              <span class="timeline__years">2025 — Now</span>
+              <span class="timeline__role">Development Team Lead</span>
+              <span class="timeline__org">Camorix</span>
+              <span class="timeline__place">Contract</span>
+            </li>
+            <li class="timeline__row" data-reveal>
+              <span class="timeline__years">2025 — Now</span>
+              <span class="timeline__role">Big Data</span>
+              <span class="timeline__org">Hallym University</span>
+              <span class="timeline__place">Student</span>
+            </li>
+            <li class="timeline__row" data-reveal>
+              <span class="timeline__years">2019 — 2025</span>
+              <span class="timeline__role">Software Engineer</span>
+              <span class="timeline__org">Independent</span>
+              <span class="timeline__place">Freelance</span>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           Contact
+           ============================================================ -->
+      <section class="section contact" id="contact">
+        <div class="container">
+          <p class="label" data-reveal>Contact</p>
+
+          <h2 class="whisper contact__lede" data-split-words>Say hello.</h2>
+
+          <p class="contact__note" data-reveal>
+            Ideas, questions, or just a good conversation about systems — my inbox is open.
+          </p>
+
+          <div class="contact__actions" data-reveal>
+            <a class="pill" href="mailto:baejaehwan1125@gmail.com">Send an email</a>
+            <a class="pill" href="https://github.com/evanbaee" target="_blank" rel="noopener">
+              GitHub
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ============================================================
+         Footer
+         ============================================================ -->
+    <footer class="footer">
+      <div class="container footer__grid">
+        <div class="footer__col">
+          <p>Evan Bae</p>
+          <p>Seoul, Korea</p>
+        </div>
+
+        <div class="footer__col">
+          <p><a href="https://github.com/evanbaee" target="_blank" rel="noopener">GitHub</a></p>
+          <p><a href="mailto:baejaehwan1125@gmail.com">Email</a></p>
+        </div>
+
+        <div class="footer__col">
+          <p><a href="#top">Back to top</a></p>
+        </div>
+      </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.26/dist/lenis.min.js" defer></script>
+    <script src="assets/js/iridescence.js" defer></script>
+    <script src="assets/js/main.js" defer></script>
+  </body>
+</html>
