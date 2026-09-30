@@ -1,10 +1,12 @@
-// 3D hero — a real glass sphere refracting the iridescent field behind it.
-// The sphere wobbles like liquid when the pointer or the page moves, and
-// drifts toward the viewer as the hero scrolls away.
-// If three.js can't load or WebGL2 is missing, the 2D renderer takes over.
+// 3D backdrop — a real glass sphere refracting the iridescent field, fixed
+// behind the whole page. The light dims once the hero is behind you, and the
+// sphere travels from section to section, passing close to the camera on the
+// way. It wobbles like liquid when the pointer or the page moves.
+// If three.js can't load or WebGL2 is missing, the 2D hero renderer takes over.
 
 const hero = document.querySelector(".hero");
 const media = hero?.querySelector(".hero__media");
+const stage = document.querySelector("[data-backdrop]");
 
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
@@ -64,7 +66,8 @@ const noise3 = `
 
 const fallBackTo2D = (error) => {
   if (error) console.warn("3D hero unavailable, using the 2D backdrop.", error);
-  media?.querySelector(".hero__canvas:not([data-iridescence])")?.remove();
+  stage?.querySelector(".backdrop__canvas")?.remove();
+  document.documentElement.classList.remove("has-3d");
   window.Iridescence?.start2D();
 };
 
@@ -72,7 +75,7 @@ const init = (THREE) => {
   const { noise, field } = window.Iridescence.glsl;
 
   const canvas = document.createElement("canvas");
-  canvas.className = "hero__canvas";
+  canvas.className = "backdrop__canvas";
   const renderer = new THREE.WebGLRenderer({
     canvas,
     antialias: true,
@@ -83,8 +86,8 @@ const init = (THREE) => {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   if ("transmissionResolutionScale" in renderer) renderer.transmissionResolutionScale = 0.5;
 
-  media.querySelector("[data-iridescence]").hidden = true;
-  media.prepend(canvas);
+  stage.prepend(canvas);
+  document.documentElement.classList.add("has-3d");
 
   const scene = new THREE.Scene();
   // A narrow lens keeps the sphere round even near the edge of the frame.
@@ -128,6 +131,8 @@ const init = (THREE) => {
       uTime: { value: 0 },
       uHalf: { value: new THREE.Vector2(1, 1) },
       uPointer: { value: new THREE.Vector2(0, 0) },
+      uFlow: { value: 0 },
+      uGlow: { value: 1 },
     },
     vertexShader: `
       varying vec2 vUv;
@@ -140,13 +145,17 @@ const init = (THREE) => {
       uniform float uTime;
       uniform vec2 uHalf;
       uniform vec2 uPointer;
+      uniform float uFlow;
+      uniform float uGlow;
       varying vec2 vUv;
 
       ${noise}
       ${field}
 
       void main() {
-        vec2 p = (vUv - 0.5) * 2.0 * uHalf + uPointer * 0.06;
+        // The bands drift upward as the page scrolls, like light passing by.
+        vec2 view = (vUv - 0.5) * 2.0 * uHalf;
+        vec2 p = view + uPointer * 0.06 - vec2(0.0, uFlow);
         float t = uTime * 0.06;
 
         vec3 color = palette(field(p, t));
@@ -156,8 +165,11 @@ const init = (THREE) => {
         color *= mix(0.04, 1.0, shade);
 
         // Gentle vignette.
-        float vignette = smoothstep(1.6, 0.3, length(p / uHalf * 0.8));
+        float vignette = smoothstep(1.6, 0.3, length(view / uHalf * 0.8));
         color *= mix(0.45, 1.0, vignette);
+
+        // Full strength in the hero, a low ambient glow behind the content.
+        color *= uGlow;
 
         // Authored in display space; store linear so the glass samples it correctly.
         gl_FragColor = vec4(pow(color, vec3(2.2)), 1.0);
@@ -219,23 +231,78 @@ const init = (THREE) => {
   const sphere = new THREE.Mesh(new THREE.IcosahedronGeometry(1, coarsePointer ? 28 : 48), glass);
   scene.add(sphere);
 
-  // --- Layout mirrors the 2D composition: a large sphere resting upper right.
-  const base = { x: 0, y: 0, radius: 1, unit: 1 };
+  // --- Where the sphere rests in each section. x and y mix a fraction of the
+  // half-viewport with an offset in units of the shorter side, so the
+  // composition holds on any screen. The hero stop mirrors the 2D design.
+  const stops = [
+    { target: hero, x: [1, -0.43], y: [1, -0.33], r: 0.57, glow: 1 },
+    { target: "#work", x: [1, -0.24], y: [0, 0.04], r: 0.3, glow: 0.36 },
+    { target: "#about", x: [-1, 0.22], y: [-1, 0.34], r: 0.26, glow: 0.32 },
+    { target: "#approach", x: [0, 0.22], y: [0, 0], r: 0.4, glow: 0.44 },
+    { target: "#experience", x: [1, -0.2], y: [1, -0.32], r: 0.22, glow: 0.3 },
+    { target: "#contact", x: [1, -0.42], y: [0, -0.02], r: 0.5, glow: 0.6 },
+  ]
+    .map((stop) => ({
+      ...stop,
+      el: typeof stop.target === "string" ? document.querySelector(stop.target) : stop.target,
+      at: 0,
+      baseGlow: stop.glow,
+    }))
+    .filter((stop) => stop.el);
+
+  // A stop is reached when its section sits in the middle of the viewport.
+  const measureStops = () => {
+    const viewportH = window.innerHeight;
+    const maxScroll = Math.max(document.documentElement.scrollHeight - viewportH, 0);
+    // Tall, narrow screens put more of the bands behind text, so dim them further.
+    const contentGlow = window.innerWidth < 640 ? 0.55 : 1;
+    let previous = 0;
+    stops.forEach((stop, i) => {
+      if (i === 0) return;
+      stop.glow = stop.baseGlow * contentGlow;
+      const rect = stop.el.getBoundingClientRect();
+      const centred = rect.top + window.scrollY + rect.height / 2 - viewportH / 2;
+      stop.at = Math.max(Math.min(centred, maxScroll), previous + 1);
+      previous = stop.at;
+    });
+  };
+
+  const smoothstep = (t) => t * t * (3 - 2 * t);
+  const mix = (a, b, t) => a + (b - a) * t;
+
+  const targetFor = (scroll) => {
+    let i = 0;
+    while (i < stops.length - 1 && scroll > stops[i + 1].at) i++;
+    const from = stops[i];
+    const to = stops[Math.min(i + 1, stops.length - 1)];
+    const span = to.at - from.at;
+    const t = span > 0 ? smoothstep(Math.min(Math.max((scroll - from.at) / span, 0), 1)) : 0;
+    return {
+      nx: mix(from.x[0], to.x[0], t),
+      ux: mix(from.x[1], to.x[1], t),
+      ny: mix(from.y[0], to.y[0], t),
+      uy: mix(from.y[1], to.y[1], t),
+      r: mix(from.r, to.r, t),
+      glow: mix(from.glow, to.glow, t),
+      // Between stops the sphere swings toward the camera.
+      lift: Math.sin(Math.PI * t),
+    };
+  };
+
+  const state = targetFor(window.scrollY);
+  const view = { w: 1, h: 1, unit: 1 };
 
   const layout = () => {
-    const width = hero.clientWidth;
-    const height = hero.clientHeight;
+    const width = stage.clientWidth;
+    const height = stage.clientHeight;
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
 
     const fov = THREE.MathUtils.degToRad(camera.fov / 2);
-    const viewH = 2 * Math.tan(fov) * camera.position.z;
-    const viewW = viewH * camera.aspect;
-    base.unit = Math.min(viewW, viewH);
-    base.radius = 0.57 * base.unit;
-    base.x = viewW / 2 - 0.43 * base.unit;
-    base.y = viewH / 2 - 0.33 * base.unit;
+    view.h = 2 * Math.tan(fov) * camera.position.z;
+    view.w = view.h * camera.aspect;
+    view.unit = Math.min(view.w, view.h);
 
     // Backdrop fills the view at its depth, with room for pointer drift.
     const depth = camera.position.z - backdrop.position.z;
@@ -243,12 +310,13 @@ const init = (THREE) => {
     backdrop.scale.set(backH * camera.aspect, backH, 1);
     const unitPx = Math.min(width, height);
     backdropMaterial.uniforms.uHalf.value.set((0.5 * width * 1.1) / unitPx, (0.5 * height * 1.1) / unitPx);
+
+    measureStops();
   };
 
   // --- Input: pointer drift and scroll, both feed the wobble.
   const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
   let lastScroll = window.scrollY;
-  let heroProgress = 0;
 
   window.addEventListener(
     "pointermove",
@@ -264,8 +332,6 @@ const init = (THREE) => {
   );
 
   const readScroll = () => {
-    const rect = hero.getBoundingClientRect();
-    heroProgress = Math.min(Math.max(-rect.top / rect.height, 0), 1);
     const delta = Math.abs(window.scrollY - lastScroll);
     lastScroll = window.scrollY;
     wobble.target = Math.min(wobble.target + delta * 0.0005, 0.05);
@@ -278,7 +344,7 @@ const init = (THREE) => {
   // Time-based easing, so slow devices settle as quickly as fast ones.
   const approach = (rate, dt) => 1 - Math.exp(-rate * dt);
 
-  const render = (timestamp) => {
+  const render = (timestamp, snap = false) => {
     timer.update(timestamp);
     const dt = Math.min(timer.getDelta(), 0.1);
     const time = timer.getElapsed() + TIME_OFFSET;
@@ -291,50 +357,65 @@ const init = (THREE) => {
     sphereUniforms.uWobble.value = wobble.amount;
     sphereUniforms.uTime.value = time;
 
+    // Ease toward the stop for the current scroll position.
+    const target = targetFor(window.scrollY);
+    const follow = snap ? 1 : approach(6, dt);
+    for (const key in target) state[key] += (target[key] - state[key]) * follow;
+
     backdropMaterial.uniforms.uTime.value = time;
     backdropMaterial.uniforms.uPointer.value.set(pointer.x * 0.5, pointer.y * 0.5);
+    backdropMaterial.uniforms.uFlow.value = (window.scrollY / window.innerHeight) * 0.35;
+    backdropMaterial.uniforms.uGlow.value = state.glow;
 
-    // Float, lean toward the pointer, and come forward as the hero scrolls away.
-    const drift = base.unit * 0.015;
+    // Float, lean toward the pointer, and swing forward between sections.
+    const drift = view.unit * 0.015;
     sphere.position.set(
-      base.x + Math.sin(time * 0.08) * drift + pointer.x * base.unit * 0.03,
-      base.y + Math.cos(time * 0.066) * drift + pointer.y * base.unit * 0.03 + heroProgress * base.unit * 0.25,
-      heroProgress * 4,
+      state.nx * view.w * 0.5 + state.ux * view.unit + Math.sin(time * 0.08) * drift + pointer.x * view.unit * 0.03,
+      state.ny * view.h * 0.5 + state.uy * view.unit + Math.cos(time * 0.066) * drift + pointer.y * view.unit * 0.03,
+      state.lift * 3,
     );
-    sphere.scale.setScalar(base.radius);
+    sphere.scale.setScalar(state.r * view.unit);
     sphere.rotation.set(pointer.y * 0.25, pointer.x * 0.35 + time * 0.03, 0);
 
     renderer.render(scene, camera);
   };
 
   layout();
-  readScroll();
-  render();
+  render(undefined, true);
   requestAnimationFrame(() => canvas.classList.add("is-ready"));
 
-  window.addEventListener("resize", () => {
-    layout();
-    if (reduceMotion) render();
-  });
+  // Section positions shift as fonts and images load.
+  new ResizeObserver(measureStops).observe(document.body);
 
-  if (reduceMotion) return;
+  if (reduceMotion) {
+    // No animation loop: redraw only when the page moves or resizes.
+    let queued = false;
+    const redraw = () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        render(undefined, true);
+      });
+    };
+    window.addEventListener("scroll", redraw, { passive: true });
+    window.addEventListener("resize", () => {
+      layout();
+      redraw();
+    });
+    return;
+  }
 
+  window.addEventListener("resize", layout);
   window.addEventListener("scroll", readScroll, { passive: true });
 
-  // Only animate while the hero is on screen and the tab is visible.
-  let heroVisible = true;
-  const sync = () => {
-    renderer.setAnimationLoop(heroVisible && !document.hidden ? render : null);
-  };
-  new IntersectionObserver(([entry]) => {
-    heroVisible = entry.isIntersecting;
-    sync();
-  }).observe(hero);
+  // Animate while the tab is visible.
+  const sync = () => renderer.setAnimationLoop(document.hidden ? null : render);
   document.addEventListener("visibilitychange", sync);
   sync();
 };
 
-if (hero && media) {
+if (hero && media && stage) {
   import("three")
     .then((THREE) => {
       const probe = document.createElement("canvas");

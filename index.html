@@ -56,6 +56,11 @@
     <a class="skip-link" href="#main">Skip to content</a>
     <div class="cursor" aria-hidden="true" data-cursor><span class="cursor__label"></span></div>
 
+    <!-- Fixed 3D backdrop behind the whole page; the canvas is added by hero3d.js -->
+    <div class="backdrop" aria-hidden="true" data-backdrop>
+      <div class="backdrop__grain"></div>
+    </div>
+
     <!-- ============================================================
          Navigation — sits on the hero and scrolls away with it
          ============================================================ -->
@@ -91,7 +96,6 @@
         <div class="hero__media" aria-hidden="true">
           <canvas class="hero__canvas" data-iridescence></canvas>
           <div class="hero__fallback"></div>
-          <div class="hero__grain"></div>
         </div>
         <div class="hero__fade" aria-hidden="true"></div>
 

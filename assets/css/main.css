@@ -62,7 +62,6 @@ html.lenis body {
 body {
   margin: 0;
   overflow-x: clip;
-  background: var(--surface-obsidian);
   color: var(--text);
   font-family: var(--font-roobert);
   font-size: var(--text-body);
@@ -431,8 +430,39 @@ a[target="_blank"]:not(.work__link)::after {
   }
 }
 
+/* --------------------------------------------------------------------------
+   Page backdrop — the 3D scene, fixed behind every section
+   -------------------------------------------------------------------------- */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.backdrop__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 2s var(--ease-glide);
+}
+
+.backdrop__canvas.is-ready {
+  opacity: 1;
+}
+
+/* With the 3D backdrop running, the hero's own 2D layers step aside */
+.has-3d .hero__media,
+.has-3d .hero__fade {
+  display: none;
+}
+
 /* Film grain over the backdrop */
-.hero__grain {
+.backdrop__grain {
   position: absolute;
   inset: -50%;
   opacity: 0.16;
